@@ -1,43 +1,63 @@
-variable "ssh_key_id" {
-  description = "A SSH public key ID to add to the VPN instance."
-}
+# variable "ssh_key_id" {
+#   description = "A SSH public key ID to add to the VPN instance."
+# }
 
 variable "instance_type" {
   default     = "t2.micro"
   description = "The machine type to launch, some machines may offer higher throughput for higher use cases."
 }
 
-variable "asg_min_size" {
-  default     = 1
-  description = "We may want more than one machine in a scaling group, but 1 is recommended."
-}
+# variable "asg_min_size" {
+#   default     = 1
+#   description = "We may want more than one machine in a scaling group, but 1 is recommended."
+# }
 
-variable "asg_desired_capacity" {
-  default     = 1
-  description = "We may want more than one machine in a scaling group, but 1 is recommended."
-}
+# variable "asg_desired_capacity" {
+#   default     = 1
+#   description = "We may want more than one machine in a scaling group, but 1 is recommended."
+# }
 
-variable "asg_max_size" {
-  default     = 1
-  description = "We may want more than one machine in a scaling group, but 1 is recommended."
-}
+# variable "asg_max_size" {
+#   default     = 1
+#   description = "We may want more than one machine in a scaling group, but 1 is recommended."
+# }
 
-variable "vpc_id" {
-  description = "The VPC ID in which Terraform will launch the resources."
-}
+# variable "vpc_id" {
+#   description = "The VPC ID in which Terraform will launch the resources."
+# }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "A list of subnets for the Autoscaling Group to use for launching instances. May be a single subnet, but it must be an element in a list."
-}
+# variable "subnet_ids" {
+#   type        = list(string)
+#   description = "A list of subnets for the Autoscaling Group to use for launching instances. May be a single subnet, but it must be an element in a list."
+# }
+
+# variable "wg_client_public_keys" {
+#   type        = map
+#   description = "List of maps of client IPs and public keys. See Usage in README for details."
+#   default = {
+#     "10.0.1.3/32" = "QFX/DXxUv56mleCJbfYyhN/KnLCrgp7Fq2fyVOk/FWU=",
+#     "10.0.1.4/32" = "+IEmKgaapYosHeehKW8MCcU65Tf5e4aXIvXGdcUlI0Q=",
+#     "10.0.1.5/32" = "WO0tKrpUWlqbl/xWv6riJIXipiMfAEKi51qvHFUU30E=",
+#   }
+# }
 
 variable "wg_client_public_keys" {
-  # type        = map(string)
-  description = "List of maps of client IPs and public keys. See Usage in README for details."
+  type  = list(map(string))
+  default = [
+    {
+      "192.168.2.2/32" = "QFX/DXxUv56mleCJbfYyhN/KnLCrgp7Fq2fyVOk/FWU=" 
+    },
+    {
+      "192.168.2.3/32" = "+IEmKgaapYosHeehKW8MCcU65Tf5e4aXIvXGdcUlI0Q="
+    },
+    {
+      "192.168.2.4/32" = "WO0tKrpUWlqbl/xWv6riJIXipiMfAEKi51qvHFUU30E="
+    }
+  ]
 }
 
 variable "wg_server_net" {
-  default     = "192.168.2.1/24"
+  default     = "10.0.1.0/24"
   description = "IP range for vpn server - make sure your Client ips are in this range but not the specific ip i.e. not .1"
 }
 
@@ -53,26 +73,27 @@ variable "wg_persistent_keepalive" {
 
 variable "use_eip" {
   type        = bool
-  default     = false
+  default     = true
   description = "Whether to enable Elastic IP switching code in user-data on wg server startup. If true, eip_id must also be set to the ID of the Elastic IP."
 }
 
 variable "eip_id" {
   type        = string
   description = "ID of the Elastic IP to use, when use_eip is enabled."
+  default     = "aws_eip.wireguard.id"
 }
 
-variable "additional_security_group_ids" {
-  type        = list(string)
-  default     = [""]
-  description = "Additional security groups if provided, default empty."
-}
+# variable "additional_security_group_ids" {
+#   type        = list(string)
+#   default     = [""]
+#   description = "Additional security groups if provided, default empty."
+# }
 
-variable "target_group_arns" {
-  type        = list(string)
-  default     = null
-  description = "Running a scaling group behind an LB requires this variable, default null means it won't be included if not set."
-}
+# variable "target_group_arns" {
+#   type        = list(string)
+#   default     = null
+#   description = "Running a scaling group behind an LB requires this variable, default null means it won't be included if not set."
+# }
 
 variable "env" {
   default     = "prod"
@@ -80,14 +101,14 @@ variable "env" {
 }
 
 variable "wg_server_private_key_param" {
-  default     = "/wireguard/wg-server-private-key"
+  default     = "wireguard_private_key"
   description = "The SSM parameter containing the WG server private key."
 }
 
-variable "ami_id" {
-  default     = null # we check for this and use a data provider since we can't use it here
-  description = "The AWS AMI to use for the WG server, defaults to the latest Ubuntu 16.04 AMI if not specified."
-}
+# variable "ami_id" {
+#   default     = null # we check for this and use a data provider since we can't use it here
+#   description = "The AWS AMI to use for the WG server, defaults to the latest Ubuntu 16.04 AMI if not specified."
+# }
 
 variable "wg_server_interface" {
   default     = "eth0"
